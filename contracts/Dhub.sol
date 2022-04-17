@@ -31,12 +31,13 @@ contract Dhub {
     User storage user = users[msg.sender];
 
     require(bytes(user.name).length > 0, "User not found");
+    bytes32 fieldToCompare = keccak256(abi.encodePacked(field));
 
-    if(keccak256(abi.encodePacked(field)) == keccak256(abi.encodePacked("name"))){
+    if(fieldToCompare == keccak256(abi.encodePacked("name"))){
       require(bytes(value).length > 0, "Name is required");
       user.name = value;
 
-    } else if(keccak256(abi.encodePacked(field)) == keccak256(abi.encodePacked("name"))){
+    } else if(fieldToCompare == keccak256(abi.encodePacked("profileUrl"))){
       require(bytes(value).length > 0, "Profile url is required");
       user.profileUrl = value;
 
