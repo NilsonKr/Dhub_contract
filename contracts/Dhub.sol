@@ -25,4 +25,26 @@ contract Dhub {
 
     users[msg.sender] = User(name, profileUrl);
   }
+
+
+  function editUser (string memory field, string memory value) external returns(User memory){ 
+    User storage user = users[msg.sender];
+
+    require(bytes(user.name).length > 0, "User not found");
+
+    if(keccak256(abi.encodePacked(field)) == keccak256(abi.encodePacked("name"))){
+      require(bytes(value).length > 0, "Name is required");
+      user.name = value;
+
+    } else if(keccak256(abi.encodePacked(field)) == keccak256(abi.encodePacked("name"))){
+      require(bytes(value).length > 0, "Profile url is required");
+      user.profileUrl = value;
+
+    } else {
+      require(false, "Field not found");
+    }
+
+    return user;
+  }
 }
+ 
