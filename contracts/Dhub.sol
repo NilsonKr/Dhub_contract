@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 contract Dhub {
+
   // User information data structure
   struct User {
     string name;
@@ -13,6 +14,7 @@ contract Dhub {
    uint8 id;
    string url;
    string title;
+   string description;
    string uploadDate;
    uint256 size;
   }
@@ -88,7 +90,7 @@ contract Dhub {
   function uploadFile (UserFile calldata file) external {
     uint8 idCounter = uint8(filesByUser[msg.sender].length + 1);
 
-    UserFile memory newFile = UserFile(idCounter,file.url,file.title, file.uploadDate, file.size);
+    UserFile memory newFile = UserFile(idCounter, file.url, file.title, file.description, file.uploadDate, file.size);
    
     filesByUser[msg.sender].push(newFile);
   } 
@@ -97,8 +99,28 @@ contract Dhub {
    * @notice retrieves user's files list
    * @return list of UserFile struct by user address
    */
-  function getFilesByUser () external view returns(UserFile[] memory list) {
+  function getFilesByUser () external view returns(UserFile[] memory) {
     return filesByUser[msg.sender];
+  }
+
+
+  /**
+   * @notice retrieves user's specific file
+   * @param position indicates the index of file in UserFile array
+   * @dev search the file by its index position in array
+   * @return UserFile corresponding struct 
+   */
+  function getFileByPosition (uint8 position) external view returns(UserFile memory){
+    return filesByUser[msg.sender][position];
+  }
+  
+
+  /**
+   * @notice updates the fields "name" & "description" of a specific file of a user
+   * @dev this function should update at once both fields, so it might receive more than 1 field and value
+   */
+  function editFile () external {
+
   }
 }
  
