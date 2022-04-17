@@ -7,7 +7,16 @@ contract Dhub {
     string profileUrl;
   }    
 
+  struct UserFile { 
+   uint8 id;
+   string url;
+   string title;
+   string uploadDate;
+   uint256 size;
+  }
+
   mapping (address => User) public users;
+  mapping (address => UserFile[]) public filesByUser;
 
   function login () external view returns(User memory){
     User memory user = users[msg.sender];
@@ -27,7 +36,7 @@ contract Dhub {
   }
 
 
-  function editUser (string memory field, string memory value) external returns(User memory){ 
+  function editUser (string memory field, string memory value) external{ 
     User storage user = users[msg.sender];
 
     require(bytes(user.name).length > 0, "User not found");
@@ -45,7 +54,18 @@ contract Dhub {
       require(false, "Field not found");
     }
 
-    return user;
+  }
+
+  function uploadFile (UserFile calldata file) external {
+    uint8 idCounter = uint8(filesByUser[msg.sender].length + 1);
+
+    UserFile memory newFile = UserFile(idCounter,file.url,file.title, file.uploadDate, file.size);
+   
+    filesByUser[msg.sender].push(newFile);
+  } 
+
+  function getFilesByUser () external view returns(UserFile[] memory list) {
+    return filesByUser[msg.sender];
   }
 }
  
