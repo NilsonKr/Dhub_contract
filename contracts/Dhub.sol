@@ -120,7 +120,7 @@ contract Dhub {
    * @param description new description to set to the file 
    * @dev if either "title" or "description" are the same as olders, won't set up again 
    */
-  function editFile (uint8 position ,string calldata title, string calldata description ) external {
+  function editFile (uint8 position, string calldata title, string calldata description ) external {
     UserFile storage file = filesByUser[msg.sender][position];
 
     if(keccak256(abi.encode(file.title)) != keccak256(abi.encode(title))){
@@ -130,6 +130,21 @@ contract Dhub {
     if(keccak256(abi.encode(file.description)) != keccak256(abi.encode(description))){
       file.description = description;
     }
+  }
+
+  /**
+   * @notice remove a file from the collection
+   * @param position index of file in user's collection
+   * @dev shift elements until the end of array and then executes a .pop() to delete the leftover
+   */
+  function removeFile(uint8 position) external {
+    UserFile[] collection = filesByUser[msg.sender];
+    
+    for(uint i = position; i < collection.length; i++){
+      collection[i] = collection[i + 1];
+    }
+
+    collection.pop();
   }
 }
  
