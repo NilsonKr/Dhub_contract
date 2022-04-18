@@ -103,7 +103,6 @@ contract Dhub {
     return filesByUser[msg.sender];
   }
 
-
   /**
    * @notice retrieves user's specific file
    * @param position indicates the index of file in UserFile array
@@ -114,13 +113,23 @@ contract Dhub {
     return filesByUser[msg.sender][position];
   }
   
-
   /**
    * @notice updates the fields "name" & "description" of a specific file of a user
-   * @dev this function should update at once both fields, so it might receive more than 1 field and value
+   * @param position receive the index in array to access to target file
+   * @param title new title to set to the fil  
+   * @param description new description to set to the file 
+   * @dev if either "title" or "description" are the same as olders, won't set up again 
    */
-  function editFile () external {
+  function editFile (uint8 position ,string calldata title, string calldata description ) external {
+    UserFile storage file = filesByUser[msg.sender][position];
 
+    if(keccak256(abi.encode(file.title)) != keccak256(abi.encode(title))){
+      file.title = title;
+    }
+
+    if(keccak256(abi.encode(file.description)) != keccak256(abi.encode(description))){
+      file.description = description;
+    }
   }
 }
  
