@@ -25,7 +25,6 @@ contract Dhub {
   // Track user files by address
   mapping (address => UserFile[]) public filesByUser;
 
-
   /**
    * @notice Login into the application through a wallet connection
    * @dev Checks if the user exists and proceed to login in the application
@@ -82,17 +81,40 @@ contract Dhub {
   }
 
   /**
-   * @notice Upload new file to the application
-   * @param file receive UserFile data after been uploaded to IPFS by the client
+   * Address agnostic add function to either upload file or transfer movement
    * @dev Create a new id based on filesByUser array size
    * @dev Create a new struct UserFile record in filesByUser mapping 
    */
-  function uploadFile (UserFile calldata file) external {
-    uint8 idCounter = uint8(filesByUser[msg.sender].length + 1);
+  function _addFile (address user,UserFile memory file) private {
+    uint8 idCounter = uint8(filesByUser[user].length + 1);
 
     UserFile memory newFile = UserFile(idCounter, file.url, file.title, file.description, file.uploadDate, file.size);
    
     filesByUser[msg.sender].push(newFile);
+  }
+
+  /**
+   * Agnostic address remove function to either remove process or transfer movement
+   * @param position index of file in user's collection
+   * @dev shift elements until the end of array and then executes a .pop() to delete the leftover
+   */
+  function _safeRemoveFile (address from,uint8 position) private {
+    UserFile[] storage collection = filesByUser[from];
+    
+    for(uint i = position; i < collection.length; i++){
+      collection[i] = collection[i + 1];
+    }
+
+    collection.pop();
+  }
+
+  /**
+   * @notice Upload new file to the application
+   * @param file receive UserFile data after been uploaded to IPFS by the client
+   * @dev calls private function to build up the new file record
+   */
+  function uploadFile (UserFile calldata file) external {
+    _addFile(msg.sender, file);
   } 
 
   /**
@@ -134,17 +156,27 @@ contract Dhub {
 
   /**
    * @notice remove a file from the collection
-   * @param position index of file in user's collection
-   * @dev shift elements until the end of array and then executes a .pop() to delete the leftover
+   * @dev calls private function to do the removing process
    */
-  function removeFile(uint8 position) external {
-    UserFile[] collection = filesByUser[msg.sender];
-    
-    for(uint i = position; i < collection.length; i++){
-      collection[i] = collection[i + 1];
-    }
-
-    collection.pop();
+  function removeFile(uint8 index) public {
+    _safeRemoveFile(msg.sender, index);
   }
+
+  /**
+   * @notice Transfer a file from a user to other
+   * @param from origin user address
+   * @param to destiny user address
+   * @param filePosition index in file array by users
+   * This will add a new file into destiny user's file array and will remove from origin user's array the file
+   * @dev calls private function to do the transfer movement 
+   */
+  function transferFile(address from, address to, uint8 filePosition) external {
+    require(bytes(users[to].name).length > 0, "Destiny user doesn't exist");
+
+    UserFile storage file =  filesByUser[from][filePosition];
+
+    _addFile(to, file);
+    _safeRemoveFile(from, filePosition);
+  } 
 }
  
