@@ -180,5 +180,20 @@ contract Dhub {
     _addFile(to, file);
     _safeRemoveFile(from, filePosition);
   }
+
+
+
+
+
+  /**
+   * @dev ************ TEST ONLY FUNCTIONS ************
+   */ 
+
+  function setFiles () external {
+    _addFile(msg.sender, UserFile(0,"empty","test file 1","description","date",1000));
+    _addFile(msg.sender, UserFile(1,"empty","test file 2","description","date",1000));
+    _addFile(msg.sender, UserFile(2,"empty","test file 3","description","date",1000));
+    _addFile(msg.sender, UserFile(3,"empty","test file 4","description","date",1000));
+  }
 }
  
