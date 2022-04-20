@@ -95,17 +95,21 @@ contract Dhub {
 
   /**
    * Agnostic address remove function to either remove process or transfer movement
+   * This function alters the order of user's file collection but keeps a lower complexity than a for loop ( O(1) )
    * @param position index of file in user's collection
-   * @dev shift elements until the end of array and then executes a .pop() to delete the leftover
+   * @dev Swap lastFile onto to-remove file target and then executes a pop to remove the older lastFile copy 
    */
   function _safeRemoveFile (address from,uint8 position) private {
+    //Execute an swap and pop operation in the collection
     UserFile[] storage collection = filesByUser[from];
     
-    for(uint i = position; i < collection.length; i++){
-      collection[i] = collection[i + 1];
-    }
+    //Find last element index in collection
+    uint256 lastIndex = collection.length - 1;  
+    UserFile memory lastFile = collection[lastIndex];
 
-    collection.pop();
+    collection[position] = lastFile; // Move last file to the to-delete file index
+
+    collection.pop(); // Remove last file leftover copy 
   }
 
   /**
