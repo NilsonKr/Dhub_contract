@@ -102,7 +102,9 @@ contract Dhub {
     UserFile[] storage collection = filesByUser[from];
     
     for(uint i = position; i < collection.length; i++){
-      collection[i] = collection[i + 1];
+       if(i != collection.length - 1){ // Avoid go to index out of collection's bounds
+        collection[i] = collection[i + 1];
+      }
     }
 
     collection.pop();
@@ -177,6 +179,6 @@ contract Dhub {
 
     _addFile(to, file);
     _safeRemoveFile(from, filePosition);
-  } 
+  }
 }
  
