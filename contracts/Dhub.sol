@@ -90,7 +90,7 @@ contract Dhub {
 
     UserFile memory newFile = UserFile(idCounter, file.url, file.title, file.description, file.uploadDate, file.size);
    
-    filesByUser[msg.sender].push(newFile);
+    filesByUser[user].push(newFile);
   }
 
   /**
@@ -142,16 +142,21 @@ contract Dhub {
    * @param position receive the index in array to access to target file
    * @param title new title to set to the fil  
    * @param description new description to set to the file 
-   * @dev if either "title" or "description" are the same as olders, won't set up again 
+   * @dev Only it's going to set up if the field is not empty & is not the same as older one
    */
   function editFile (uint8 position, string calldata title, string calldata description ) external {
+    bool isTitle = bytes(title).length > 0;
+    bool isDescription = bytes(description).length > 0;
+
+    require(isTitle || isDescription, "Both fields are empty");
+    
     UserFile storage file = filesByUser[msg.sender][position];
 
-    if(keccak256(abi.encode(file.title)) != keccak256(abi.encode(title))){
+    if(isTitle && keccak256(abi.encode(file.title)) != keccak256(abi.encode(title))){
       file.title = title;
     }
 
-    if(keccak256(abi.encode(file.description)) != keccak256(abi.encode(description))){
+    if(isDescription && keccak256(abi.encode(file.description)) != keccak256(abi.encode(description))){
       file.description = description;
     }
   }
@@ -166,19 +171,20 @@ contract Dhub {
 
   /**
    * @notice Transfer a file from a user to other
-   * @param from origin user address
-   * @param to destiny user address
+   * @param owner origin user address
+   * @param destiny target user address
    * @param filePosition index in file array by users
    * This will add a new file into destiny user's file array and will remove from origin user's array the file
    * @dev calls private function to do the transfer movement 
    */
-  function transferFile(address from, address to, uint8 filePosition) external {
-    require(bytes(users[to].name).length > 0, "Destiny user doesn't exist");
+  function transferFile(address owner, address destiny, uint8 filePosition) external {
+    require(msg.sender == owner, "You're not the owner");
+    require(bytes(users[destiny].name).length > 0, "Destiny user doesn't exist");
 
-    UserFile storage file =  filesByUser[from][filePosition];
+    UserFile memory file =  filesByUser[owner][filePosition];
 
-    _addFile(to, file);
-    _safeRemoveFile(from, filePosition);
+    _addFile(destiny, file);
+    _safeRemoveFile(owner, filePosition);
   }
 
 
