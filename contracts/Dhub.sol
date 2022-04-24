@@ -25,6 +25,12 @@ contract Dhub {
   // Track user files by address
   mapping (address => UserFile[]) public filesByUser;
 
+  // Log transfer actions
+  event Transfer(address indexed from, address indexed to, UserFile file);
+
+  // Log upload actions
+  event Upload(address indexed owner, UserFile file);
+
   //Validate user exists 
   modifier onlyUser {
     require(bytes(users[msg.sender].name).length > 0, "User not found");
@@ -87,12 +93,14 @@ contract Dhub {
    * @dev Create a new id based on filesByUser array size
    * @dev Create a new struct UserFile record in filesByUser mapping 
    */
-  function _addFile (address user,UserFile memory file) private {
+  function _addFile (address user,UserFile memory file) private returns(UserFile memory){
     uint8 idCounter = uint8(filesByUser[user].length + 1);
 
     UserFile memory newFile = UserFile(idCounter, file.url, file.title, file.description, file.uploadDate, file.size);
    
     filesByUser[user].push(newFile);
+
+    return newFile;
   }
 
   /**
@@ -120,7 +128,9 @@ contract Dhub {
    * @dev calls private function to build up the new file record
    */
   function uploadFile (UserFile calldata file) external onlyUser {
-    _addFile(msg.sender, file);
+    UserFile memory newFile = _addFile(msg.sender, file);
+
+    emit Upload(msg.sender, newFile);
   } 
 
   /**
@@ -189,6 +199,8 @@ contract Dhub {
 
     _addFile(destiny, file);
     _safeRemoveFile(owner, filePosition);
+
+    emit Transfer(owner, destiny, file);
   } 
 }
  
