@@ -15,7 +15,7 @@ async function main() {
 
   // We get the contract to deploy
   const Dhub = await ethers.getContractFactory("Dhub");
-  const dhub = await Dhub.deploy("Hello, Hardhat!");
+  const dhub = await Dhub.deploy();
 
   await dhub.deployed();
 

@@ -2,18 +2,18 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 describe("Dhub", function () {
-  it("Should return the new greeting once it's changed", async function () {
-    const Greeter = await ethers.getContractFactory("Dhub");
-    const greeter = await Greeter.deploy("Hello, world!");
-    await greeter.deployed();
+  const setup = async () => {
+    const [owner] = await ethers.getSigners()
+    const DhubContract = await ethers.getContractFactory('Dhub');
+    const deploy = await DhubContract.deploy();
+    
+    return {owner, deploy }
+  } 
 
-    expect(await greeter.greet()).to.equal("Hello, world!");
+  it("Check contract is deployed correctly", async function () {
+    const {owner,deploy} = await setup();
+    const user = await deploy.users(owner.address);
 
-    const setGreetingTx = await greeter.setGreeting("Hola, mundo!");
-
-    // wait until the transaction is mined
-    await setGreetingTx.wait();
-
-    expect(await greeter.greet()).to.equal("Hola, mundo!");
+    expect(user.name).to.be.empty;
   });
 });
