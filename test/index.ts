@@ -13,9 +13,7 @@ describe("Dhub", function () {
   it("Check contract is deployed correctly", async function () {
     const {owner,deploy} = await setup();
     const user = await deploy.users(owner.address);
-    const userFiles = await deploy.getFilesByUser();
 
     expect(user.name).to.be.empty;
-    expect(userFiles).to.has.lengthOf(0);
   });
 });
