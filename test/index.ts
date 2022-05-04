@@ -15,37 +15,55 @@ describe("Dhub", function () {
     return { owner, deploy };
   };
 
-  it("Check contract is deployed correctly", async function () {
-    const { owner, deploy } = await setup();
-    const user = await deploy.users(owner.address);
+  describe("Contract deployment", function () {
+    it("Check contract is deployed correctly", async function () {
+      const { owner, deploy } = await setup();
+      const user = await deploy.users(owner.address);
 
-    expect(user.name).to.be.empty;
+      expect(user.name).to.be.empty;
+    });
   });
 
-  it("Creates an user correctly", async function () {
-    const { deploy } = await setup();
-    await deploy.register(USER_NAME, USER_PROFILE_URL);
+  describe("User related stuff", function () {
+    it("Creates an user correctly", async function () {
+      const { deploy } = await setup();
+      await deploy.register(USER_NAME, USER_PROFILE_URL);
 
-    const user: UserInfo = await deploy.login();
+      const user: UserInfo = await deploy.login();
 
-    expect(user).to.does.not.be.undefined;
-    expect(user.name).to.be.equals(USER_NAME);
-    expect(user.profileUrl).to.be.equals(USER_PROFILE_URL);
-  });
+      expect(user).to.does.not.be.undefined;
+      expect(user.name).to.be.equals(USER_NAME);
+      expect(user.profileUrl).to.be.equals(USER_PROFILE_URL);
+    });
 
-  it("Succesfully edit a user", async function () {
-    const { deploy } = await setup();
-    await deploy.register(USER_NAME, USER_PROFILE_URL);
-    //New constants
-    const newName = "Rosie";
-    const newUrl = "https://hello.com/newProfilePic.png";
-    //Edit actions
-    await deploy.editUser("name", newName);
-    await deploy.editUser("profileUrl", newUrl);
+    it("Creates multiple user correctly", async function () {
+      const { deploy } = await setup();
+      const [_, otherAccount] = await ethers.getSigners();
+      await deploy
+        .connect(otherAccount)
+        .register("OtherAccount", "someurl.png");
 
-    const user: UserInfo = await deploy.login();
+      const otherUser: UserInfo = await deploy.connect(otherAccount).login();
 
-    expect(user.name).to.be.equals(newName);
-    expect(user.profileUrl).to.be.equals(newUrl);
+      expect(otherUser).to.does.not.be.undefined;
+      expect(otherUser.name).to.be.equals("OtherAccount");
+      expect(otherUser.profileUrl).to.be.equals("someurl.png");
+    });
+
+    it("Succesfully edit a user", async function () {
+      const { deploy } = await setup();
+      await deploy.register(USER_NAME, USER_PROFILE_URL);
+      //New constants
+      const newName = "Rosie";
+      const newUrl = "https://hello.com/newProfilePic.png";
+      //Edit actions
+      await deploy.editUser("name", newName);
+      await deploy.editUser("profileUrl", newUrl);
+
+      const user: UserInfo = await deploy.login();
+
+      expect(user.name).to.be.equals(newName);
+      expect(user.profileUrl).to.be.equals(newUrl);
+    });
   });
 });
