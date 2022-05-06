@@ -2,11 +2,19 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 import { Dhub } from "../typechain";
-import { UserInfo } from "../types";
+import { UserInfo, FileInfo } from "../types";
 
 describe("Dhub", function () {
   const USER_NAME = "NilsonKr";
   const USER_PROFILE_URL = "https://someurl/image.png";
+  const DUMMIE_FILE = {
+    id: 0,
+    url: "someurl",
+    title: "Pic",
+    description: "desc",
+    uploadDate: new Date().toDateString(),
+    size: 1000,
+  };
 
   const setup = async () => {
     const [owner] = await ethers.getSigners();
@@ -26,6 +34,13 @@ describe("Dhub", function () {
     const user: UserInfo = await deploy.login();
 
     return user;
+  };
+
+  const uploadFile = async (deploy: Dhub, data: FileInfo) => {
+    const index = await deploy.uploadFile(data);
+    const file = await deploy.getFileByPosition(index.value);
+
+    return file;
   };
 
   describe("Contract deployment", function () {
@@ -92,21 +107,34 @@ describe("Dhub", function () {
       const { deploy } = await setup();
       await register(deploy);
 
-      await deploy.uploadFile({
-        id: 1,
-        url: "someurl",
-        title: "Pic",
-        description: "desc",
-        uploadDate: new Date().toDateString(),
-        size: 1000,
-      });
+      const recentFile = await uploadFile(deploy, DUMMIE_FILE);
 
       const files = await deploy.getFilesByUser();
-      const recentFile = await deploy.getFileByPosition(0);
 
       expect(files).to.have.lengthOf(1);
       expect(recentFile.id).to.be.equals(1);
       expect(recentFile.title).to.be.equals("Pic");
+    });
+
+    it("Upload multiple files", async function () {
+      const { deploy } = await setup();
+      await register(deploy);
+
+      await uploadFile(deploy, DUMMIE_FILE);
+      await uploadFile(deploy, {
+        ...DUMMIE_FILE,
+        title: "Hey",
+      });
+
+      const files = await deploy.getFilesByUser();
+      const [firstFile, secondFile] = files;
+
+      expect(files).to.have.lengthOf(2);
+
+      expect(firstFile.id).to.be.equals(1);
+      expect(secondFile.id).to.be.equals(2);
+
+      expect(secondFile.title === firstFile.title).to.be.false;
     });
   });
 });
