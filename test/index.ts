@@ -99,7 +99,7 @@ describe("Dhub", function () {
     });
   });
 
-  describe("Files related stuff", function () {
+  describe("Files crud related stuff", function () {
     it("Check initial files", async function () {
       const { deploy } = await setup();
       await register(deploy);
@@ -155,6 +155,21 @@ describe("Dhub", function () {
 
       expect(newFile.title).to.be.equals(newTitle);
       expect(newFile.description).to.be.equals(oldFile.description);
+    });
+
+    it("Remove file", async function () {
+      const { deploy } = await setup();
+      await register(deploy);
+
+      const file = await uploadFile(deploy, DUMMIE_FILE);
+      const filesList = await deploy.getFilesByUser();
+
+      expect(filesList).to.have.lengthOf(1);
+
+      await deploy.removeFile(file.id - 1);
+      const newFilesList = await deploy.getFilesByUser();
+
+      expect(newFilesList).to.be.empty;
     });
   });
 });
