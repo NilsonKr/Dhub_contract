@@ -172,4 +172,42 @@ describe("Dhub", function () {
       expect(newFilesList).to.be.empty;
     });
   });
+
+  describe("Transfer related stuff", function () {
+    it("Transfer process", async function () {
+      const { deploy, owner } = await setup();
+      const [_, destinyAccount] = await ethers.getSigners();
+      //Creating users
+      await register(deploy);
+      await deploy
+        .connect(destinyAccount)
+        .register("destinyAccount", "someurl.png");
+      //Upload
+      const file = await uploadFile(deploy, DUMMIE_FILE);
+
+      const currentOwnerFiles = await deploy.getFilesByUser();
+      const currentTargetFiles = await deploy
+        .connect(destinyAccount)
+        .getFilesByUser();
+
+      expect(currentOwnerFiles).to.have.lengthOf(1);
+      expect(currentTargetFiles).to.have.lengthOf(0);
+
+      //Transfer process
+      await deploy.transferFile(
+        owner.address,
+        destinyAccount.address,
+        file.id - 1
+      );
+
+      //Check new collections sizes
+      const newOwnerFiles = await deploy.getFilesByUser();
+      const newTargetFiles = await deploy
+        .connect(destinyAccount)
+        .getFilesByUser();
+
+      expect(newOwnerFiles).to.have.lengthOf(0);
+      expect(newTargetFiles).to.have.lengthOf(1);
+    });
+  });
 });
