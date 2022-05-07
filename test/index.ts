@@ -37,8 +37,14 @@ describe("Dhub", function () {
   };
 
   const uploadFile = async (deploy: Dhub, data: FileInfo) => {
-    const index = await deploy.uploadFile(data);
-    const file = await deploy.getFileByPosition(index.value);
+    const recenteFile = await deploy.uploadFile(data);
+
+    const events = await recenteFile.wait();
+    const uploadEvent = events.events?.find(
+      (event) => event.event === "Upload"
+    );
+
+    const file = await deploy.getFileByPosition(uploadEvent?.args?.file.id - 1);
 
     return file;
   };
@@ -120,14 +126,13 @@ describe("Dhub", function () {
       const { deploy } = await setup();
       await register(deploy);
 
-      await uploadFile(deploy, DUMMIE_FILE);
-      await uploadFile(deploy, {
+      const firstFile = await uploadFile(deploy, DUMMIE_FILE);
+      const secondFile = await uploadFile(deploy, {
         ...DUMMIE_FILE,
         title: "Hey",
       });
 
       const files = await deploy.getFilesByUser();
-      const [firstFile, secondFile] = files;
 
       expect(files).to.have.lengthOf(2);
 
@@ -135,6 +140,21 @@ describe("Dhub", function () {
       expect(secondFile.id).to.be.equals(2);
 
       expect(secondFile.title === firstFile.title).to.be.false;
+    });
+
+    it("Edit file", async function () {
+      const { deploy } = await setup();
+      await register(deploy);
+
+      const oldFile = await uploadFile(deploy, DUMMIE_FILE);
+      const newTitle = "New title";
+
+      await deploy.editFile(oldFile.id - 1, newTitle, "");
+
+      const newFile = await deploy.getFileByPosition(oldFile.id - 1);
+
+      expect(newFile.title).to.be.equals(newTitle);
+      expect(newFile.description).to.be.equals(oldFile.description);
     });
   });
 });
