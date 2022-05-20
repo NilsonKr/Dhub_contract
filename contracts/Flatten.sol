@@ -1,7 +1,11 @@
+// Sources flattened with hardhat v2.9.3 https://hardhat.org
+
+// File contracts/Dhub.sol
+
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract Dhub {
+contract FlattenDhub {
     // User information data structure
     struct User {
         string name;
