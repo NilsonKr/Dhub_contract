@@ -14,6 +14,7 @@ describe("Dhub", function () {
     description: "desc",
     uploadDate: new Date().toDateString(),
     size: 1000,
+    shareable: false,
   };
 
   const setup = async () => {
@@ -44,7 +45,10 @@ describe("Dhub", function () {
       (event) => event.event === "Upload"
     );
 
-    const file = await deploy.getFileByPosition(uploadEvent?.args?.file.id - 1);
+    // @ts-ignore
+    const file = await deploy!.getFileByPosition(
+      uploadEvent?.args?.file.id - 1
+    );
 
     return file;
   };
@@ -151,6 +155,7 @@ describe("Dhub", function () {
 
       await deploy.editFile(oldFile.id - 1, newTitle, "");
 
+      // @ts-ignore
       const newFile = await deploy.getFileByPosition(oldFile.id - 1);
 
       expect(newFile.title).to.be.equals(newTitle);

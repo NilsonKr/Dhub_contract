@@ -36,6 +36,7 @@
   },
   "scripts": {
     "postinstall": "husky install",
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "compile": "hardhat compile"
   }
 }

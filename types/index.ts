@@ -10,4 +10,5 @@ export type FileInfo = {
   description: string;
   uploadDate: string;
   size: number;
+  shareable: boolean;
 };
