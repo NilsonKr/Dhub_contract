@@ -16,6 +16,7 @@ contract Dhub {
         string description;
         string uploadDate;
         uint256 size;
+        bool shareable;
     }
 
     // Track user information by address
@@ -105,7 +106,8 @@ contract Dhub {
             file.title,
             file.description,
             file.uploadDate,
-            file.size
+            file.size,
+            false
         );
 
         filesByUser[user].push(newFile);
@@ -175,6 +177,24 @@ contract Dhub {
         returns (UserFile memory)
     {
         return filesByUser[msg.sender][position];
+    }
+
+    /**
+     * @notice retrieves user's shared file
+     * @param shareAcc indicates what account is sharing the item
+     * @dev search the file and validate if the owner setted it up as a shareable item
+     * @return UserFile corresponding struct
+     */
+    function getFileByPosition(uint8 position, address shareAcc)
+        external
+        view
+        returns (UserFile memory)
+    {
+        UserFile memory targetItem = filesByUser[shareAcc][position];
+
+        require(targetItem.shareable, "This item is not shareable");
+
+        return targetItem;
     }
 
     /**
