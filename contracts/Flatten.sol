@@ -5,7 +5,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract FlattenDhub {
+contract Dhub {
     // User information data structure
     struct User {
         string name;
@@ -20,6 +20,7 @@ contract FlattenDhub {
         string description;
         string uploadDate;
         uint256 size;
+        bool shareable;
     }
 
     // Track user information by address
@@ -109,7 +110,8 @@ contract FlattenDhub {
             file.title,
             file.description,
             file.uploadDate,
-            file.size
+            file.size,
+            false
         );
 
         filesByUser[user].push(newFile);
@@ -182,6 +184,24 @@ contract FlattenDhub {
     }
 
     /**
+     * @notice retrieves user's shared file
+     * @param shareAcc indicates what account is sharing the item
+     * @dev search the file and validate if the owner setted it up as a shareable item
+     * @return UserFile corresponding struct
+     */
+    function getFileByPosition(uint8 position, address shareAcc)
+        external
+        view
+        returns (UserFile memory)
+    {
+        UserFile memory targetItem = filesByUser[shareAcc][position];
+
+        require(targetItem.shareable, "This item is not shareable");
+
+        return targetItem;
+    }
+
+    /**
      * @notice updates the fields "name" & "description" of a specific file of a user
      * @param position receive the index in array to access to target file
      * @param title new title to set to the fil
@@ -251,3 +271,6 @@ contract FlattenDhub {
         emit Transfer(owner, destiny, file);
     }
 }
+
+
+// File contracts/Flatten.sol
