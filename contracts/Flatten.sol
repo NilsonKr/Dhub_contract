@@ -5,7 +5,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract Dhub {
+contract DhubFlattened {
     // User information data structure
     struct User {
         string name;
@@ -237,6 +237,17 @@ contract Dhub {
     }
 
     /**
+     * @notice Automatically updates the share state of a item
+     * @param position indicates the position of the target file
+     * @dev toggle
+     */
+    function updateShareState(uint8 position) external onlyUser {
+        UserFile storage file = filesByUser[msg.sender][position];
+
+        file.shareable = !file.shareable;
+    }
+
+    /**
      * @notice remove a file from the collection
      * @dev calls private function to do the removing process
      */
@@ -271,6 +282,5 @@ contract Dhub {
         emit Transfer(owner, destiny, file);
     }
 }
-
 
 // File contracts/Flatten.sol
